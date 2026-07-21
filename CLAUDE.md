@@ -12,9 +12,9 @@ Expected environment (provisioned before the session starts):
 
 - `arm-none-eabi-gcc` + binutils + newlib via apt. The Pebble SDK does **not** bundle its own ARM toolchain — it shells out to this system one, so it must be present.
 - `pebble-tool` installed via **pipx** (`pipx install pebble-tool==5.0.38`). Install it with pipx, **not** system `pip` — system pip fails building the `pyqrcode` dependency against Debian's patched setuptools.
-- The pinned Pebble SDK pre-downloaded: `yes | pebble sdk install 4.9.169` (the version in `pebble-sdk-version`).
+- The pinned Pebble SDK pre-downloaded: `yes | pebble sdk install 4.17` (the version in `pebble-sdk-version`).
 
-To build: run `scripts/build.sh` (activates the pinned SDK, prepares the fixture, runs `pebble build`). It compiles every target and writes `build/infowatch.pbw`. If `pebble` isn't on `PATH`, add `export PATH="$HOME/.local/bin:$PATH"`.
+To build: run `scripts/build.sh` (activates the pinned SDK, prepares the fixture, runs `pebble build`). It compiles the emery target and writes `build/infowatch.pbw`. If `pebble` isn't on `PATH`, add `export PATH="$HOME/.local/bin:$PATH"`.
 
 If the toolchain is somehow missing (e.g. the startup provisioning didn't run), the install commands above are the recovery path; a **SessionStart hook** running them is a reasonable local loop. There is currently **no GitHub Actions CI** (only `.github/dependabot.yml`), so nothing compiles on push — verify builds locally before pushing.
 
@@ -28,7 +28,7 @@ The build compiles with `-std=c99 -Wall -Wextra -Werror`, so **a warning fails t
 
 ## Platform coverage
 
-Target platforms are `aplite`, `basalt`, `diorite`, `emery`, `flint` — the build compiles all of them. Only **emery** has a distinct screen (200x228); the rest (including the newer **flint**) are rectangular **144x168**. Layout code branches on `#ifdef PBL_PLATFORM_EMERY`; keep the non-emery path derived from `layer_get_bounds` (screen-size-dynamic) so aplite/basalt/diorite/flint all lay out correctly from one code path.
+The build now targets **emery** only (Pebble Time 2, 200x228 screen) — see `targetPlatforms` in `package.json`. The other platforms (`aplite`, `basalt`, `diorite`, `flint`, all rectangular 144x168) are no longer built. Layout code still branches on `#ifdef PBL_PLATFORM_EMERY`; the non-emery path derived from `layer_get_bounds` (screen-size-dynamic) is retained so the code can target those platforms again if the list is restored.
 
 ## Adding a setting or weather field (end-to-end plumbing)
 
