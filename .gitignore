@@ -1,24 +1,13 @@
 .*
 !.gitignore
-!.travis.yml
 !.github/
-!.vscode/
-!.vscode/**
 !.env.example
-!.release-please-manifest.json
-build
-src/pkjs/dev-config.js
-src/pkjs/active-fixture.generated.js
-screenshot/**/*
-!screenshot/**/
-!screenshot/frames/*.svg
-!screenshot/v*/*.png
-!screenshot/v*/raw/*.png
-!screenshot/v*/composite/*.png
-screenshot/tmp/**
-screenshot/out/**
 !.agents
+build
 node_modules
-package.json
+src/pkjs/dev-config.js
+# active-fixture.generated.js is committed (default: module.exports = null) so the
+# repo can be imported/built directly by CloudPebble. Local fixture builds
+# regenerate it; don't commit that version.
 !opencode.jsonc
 !AGENTS.md
