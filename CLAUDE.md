@@ -1,25 +1,26 @@
 ## Dev Iteration Flow
 
-After you've added a feature run `mise build` to verify it builds.
+After you've added a feature run `make build` (or `scripts/build.sh`) to verify it builds. `mise` is no longer used — the toolchain is provisioned in the env and tasks live in the `Makefile` / `scripts/`.
 
-If you need runtime logs, `mise install-emulator --logs` runs it in an emulator and prints logs to the terminal. The process stays alive until the emulator is closed
+If you need runtime logs, `scripts/install-emulator.sh --logs` runs it in an emulator and prints logs to the terminal. The process stays alive until the emulator is closed.
 
 ### Building in Claude Code on the web / remote sessions
 
-`mise build` assumes a local Pebble SDK. In a fresh web/remote session that setup is usually **not** present:
+The web/remote environment now has **full internet access** and is provisioned with the ARM toolchain at startup, so **you can compile C locally.** `mise` itself is **not** installed (and `mise.run` is still proxy-blocked) — you don't need it. Use the `pebble` CLI / `scripts/*.sh` directly.
 
-- `mise` is not preinstalled, and the installer (`mise.run`) is blocked by the agent proxy (403), so you often can't install it on the fly.
-- Even with `mise`, `pebble build` needs the ARM SDK toolchain, which is a large download from Rebble/coredevices hosts that may not be reachable.
+Expected environment (provisioned before the session starts):
 
-Consequence: **you frequently cannot compile C locally.** Plan around it:
+- `arm-none-eabi-gcc` + binutils + newlib via apt. The Pebble SDK does **not** bundle its own ARM toolchain — it shells out to this system one, so it must be present.
+- `pebble-tool` installed via **pipx** (`pipx install pebble-tool==5.0.38`). Install it with pipx, **not** system `pip` — system pip fails building the `pyqrcode` dependency against Debian's patched setuptools.
+- The pinned Pebble SDK pre-downloaded: `yes | pebble sdk install 4.9.169` (the version in `pebble-sdk-version`).
 
-- **GitHub Actions CI is the real build check** — it compiles every target on push. Push early and read the CI logs rather than batching many unverified C changes into one push. One compile failure aborts the run before later files are checked, so fix-and-repush is normal.
-- If you need a local loop, add a **SessionStart hook** that installs `pebble-tool` (pipx; `pypi.org` is allowlisted) and the SDK, and confirm the SDK actually downloads before relying on it.
-- When you can't build, review C changes extra carefully against the pitfalls below — the compiler is unforgiving here.
+To build: run `scripts/build.sh` (activates the pinned SDK, prepares the fixture, runs `pebble build`). It compiles every target and writes `build/infowatch.pbw`. If `pebble` isn't on `PATH`, add `export PATH="$HOME/.local/bin:$PATH"`.
+
+If the toolchain is somehow missing (e.g. the startup provisioning didn't run), the install commands above are the recovery path; a **SessionStart hook** running them is a reasonable local loop. There is currently **no GitHub Actions CI** (only `.github/dependabot.yml`), so nothing compiles on push — verify builds locally before pushing.
 
 ## Pebble C build gotchas
 
-CI compiles with `-std=c99 -Wall -Wextra -Werror`, so **a warning fails the build.** A few warnings are downgraded to non-fatal (`-Wno-error=format-truncation`, `-Wno-error=unused-function`, `-Wno-error=unused-variable`, `-Wno-error=unused-value`, and a handful of others); everything else is a hard error. Assume any warning you introduce will fail unless it's on that list.
+The build compiles with `-std=c99 -Wall -Wextra -Werror`, so **a warning fails the build.** A few warnings are downgraded to non-fatal (`-Wno-error=format-truncation`, `-Wno-error=unused-function`, `-Wno-error=unused-variable`, `-Wno-error=unused-value`, and a handful of others); everything else is a hard error. Assume any warning you introduce will fail unless it's on that list.
 
 - **Don't redefine macros from `pebble.h`.** It already defines `MINUTES_PER_DAY`, `SECONDS_PER_DAY`, `HOURS_PER_DAY`, `MINUTES_PER_HOUR`, `SECONDS_PER_MINUTE`, etc. Redefining one (even to the same value) is a `-Werror` failure. Grep `pebble.h` before adding a time/units constant. (This exact collision broke a build.)
 - **Size `snprintf` buffers for the max possible output**, not the typical case — tight buffers trip `-Wformat-truncation`.
