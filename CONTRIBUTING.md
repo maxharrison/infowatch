@@ -111,6 +111,8 @@ If you use Supabase GitHub sync/branching, Supabase can auto-apply migrations an
 
 `mise build` and `mise build release` automatically generate `package.json` from the template/profile before building.
 
+A committed `package.json` (rendered from the **release** profile, telemetry disabled) is checked into the repo so the project can be imported and built directly by [CloudPebble](https://cloudpebble.net) — add this GitHub repo as a source and it builds without any local tooling. `src/pkjs/active-fixture.generated.js` (default `module.exports = null`) is committed for the same reason, since `src/pkjs/index.js` requires it unconditionally. Local dev builds overwrite both files (dev UUID/displayName, or a `FIXTURE`); don't commit those regenerated versions. Run `mise prepare-package release && FIXTURE= node scripts/prepare-fixture.js` to restore the committed state before committing.
+
 If you want the extra Pebble heap debug logs, set `ENABLE_MEMORY_LOGGING=1` in your `.env` before building or installing. This is independent of the dev/release package profile.
 
 For deterministic emulator UI, set `FIXTURE=<name>` in `.env` before building or installing. Fixture files live in `fixtures/<name>.json` and define the watch facts and weather payload used by local builds.

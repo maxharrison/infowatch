@@ -8,7 +8,9 @@
 !.release-please-manifest.json
 build
 src/pkjs/dev-config.js
-src/pkjs/active-fixture.generated.js
+# active-fixture.generated.js is committed (default: module.exports = null) so the
+# repo can be imported/built directly by CloudPebble, which cannot run the build
+# scripts. Local dev builds regenerate it from a FIXTURE; don't commit that version.
 screenshot/**/*
 !screenshot/**/
 !screenshot/frames/*.svg
@@ -19,6 +21,8 @@ screenshot/tmp/**
 screenshot/out/**
 !.agents
 node_modules
-package.json
+# package.json is committed (rendered from package.template.json + the release
+# profile) so CloudPebble can import this repo as a source directly. Local builds
+# regenerate it via `scripts/prepare-package.sh`; don't commit the dev-profile version.
 !opencode.jsonc
 !AGENTS.md
