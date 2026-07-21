@@ -42,10 +42,7 @@ void persist_init() {
     }
     if (!persist_exists(CONFIG)) {
         Config config = (Config) {
-            .celsius = false,
             .time_lead_zero = false,
-            .axis_12h = false,
-            .start_mon = false,
             .prev_week = true,
             .time_font = TIME_FONT_ROBOTO,
             .color_today = GColorBlack,
@@ -54,9 +51,8 @@ void persist_init() {
             .show_bt_disconnect = true,
             .vibe = false,
             .show_am_pm = false,
-            .color_saturday = GColorFolly,
-            .color_sunday = GColorFolly,
-            .color_us_federal = GColorFolly,
+            .color_saturday = GColorOrange,
+            .color_sunday = GColorRed,
             .color_time = GColorWhite,
             .day_night_shading = true
         };

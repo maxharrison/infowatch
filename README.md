@@ -27,9 +27,9 @@ Open source revival of the beloved ForecasWatch watchface. This includes support
 * City where forecast was fetched
 * Next sunrise or sunset time
 * GPS or manual location entry
-* Fahrenheit and Celsius temperatures
+* Celsius temperatures
 * Customize time font and color
-* Customize colors for Sundays, Saturdays, and US federal holidays
+* Customize colors for Sundays and Saturdays
 * Offline configuration page
 
 *\* Using a hacky workaround*

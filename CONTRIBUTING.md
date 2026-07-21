@@ -92,7 +92,7 @@ Fixtures currently support:
 - `watch.battery.percent`: battery level used for C-rendered battery UI, 0-100.
 - `watch.battery.charging`: optional battery charging/plugged state, `true` or `false`.
 - `watchSettings.timeFormat`: watch-level time display preference, `"12h"` or `"24h"`.
-- `claySettings`: Clay-compatible settings keyed by `messageKey`, such as `"axisTimeFormat": "12h"`. Color settings use Pebble SDK color constants like `"GColorFolly"` from the Rebble color definitions: https://developer.rebble.io/docs/c/Graphics/Graphics_Types/Color_Definitions/
+- `claySettings`: Clay-compatible settings keyed by `messageKey`, such as `"firstWeek": "curr"`. Color settings use Pebble SDK color constants like `"GColorOrange"` from the Rebble color definitions: https://developer.rebble.io/docs/c/Graphics/Graphics_Types/Color_Definitions/
 - `weather.city`: weather status city label.
 - `weather.currentTemp`: current temperature in Fahrenheit.
 - `weather.startHour`: local hour for the first forecast entry; fixture prep converts it to the runtime forecast timestamp.
