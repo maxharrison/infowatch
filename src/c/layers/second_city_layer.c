@@ -2,7 +2,7 @@
 #include "c/appendix/config.h"
 #include "c/appendix/memory_log.h"
 
-#define MINUTES_PER_DAY (24 * 60)
+// MINUTES_PER_DAY is provided by pebble.h.
 
 // emery: use a larger secondary font to match the taller band on Emery.
 #ifdef PBL_PLATFORM_EMERY

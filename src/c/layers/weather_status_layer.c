@@ -67,7 +67,7 @@ static void uv_layer_refresh() {
         return;
     }
 
-    static char s_uv_buffer[8];
+    static char s_uv_buffer[16];
     snprintf(s_uv_buffer, sizeof(s_uv_buffer), "UV%d", uv);
     text_layer_set_text(s_uv_layer, s_uv_buffer);
 
