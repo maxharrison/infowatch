@@ -9,10 +9,7 @@ enum TimeFont {
 };
 
 typedef struct {
-    bool celsius;
     bool time_lead_zero;
-    bool axis_12h;
-    bool start_mon;
     bool prev_week;
     bool show_qt;
     bool show_bt;
@@ -23,7 +20,6 @@ typedef struct {
     GColor color_today;
     GColor color_saturday;
     GColor color_sunday;
-    GColor color_us_federal;
     GColor color_time;
     bool day_night_shading;
 } Config;
@@ -45,8 +41,6 @@ int config_axis_hour(int hour);
 int config_n_today();
 
 GFont config_time_font();
-
-bool config_highlight_holidays();
 
 bool config_highlight_sundays();
 

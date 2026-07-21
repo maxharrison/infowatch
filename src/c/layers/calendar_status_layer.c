@@ -4,21 +4,21 @@
 #include "c/appendix/memory_log.h"
 #include "c/services/watch_services.h"
 
-#define BATTERY_W 29
-#define BATTERY_H 10
 #define PADDING 4
 #define MONTH_FONT_OFFSET 7
 #define ICON_SLOT_1 GRect(PADDING, 0, 10, 10)
 #define ICON_SLOT_2 GRect(PADDING * 2 + 10, 0, 10, 10)
-// emery: center icons in the taller status row.
+// Total width of the battery widget, including room for the percentage number
+// drawn to the left of the battery graphic.
+// emery: center icons in the taller status row and give the larger number more room.
 #ifdef PBL_PLATFORM_EMERY
 #define STATUS_ICON_Y(bounds_h, icon_h) (((bounds_h) - (icon_h)) / 2)
-#define BATTERY_Y(bounds_h) (((bounds_h) - BATTERY_H) / 2)
 #define MONTH_FONT_KEY FONT_KEY_GOTHIC_24
+#define BATTERY_W 66
 #else
 #define STATUS_ICON_Y(bounds_h, icon_h) ((void)(bounds_h), (void)(icon_h), 0)
-#define BATTERY_Y(bounds_h) ((void)(bounds_h), 1)
 #define MONTH_FONT_KEY FONT_KEY_GOTHIC_18
+#define BATTERY_W 54
 #endif
 
 static Layer *s_calendar_status_layer;
@@ -158,7 +158,7 @@ void calendar_status_layer_create(Layer* parent_layer, GRect frame) {
     MEMORY_HEAP_PROBE_SAMPLE("after_update_proc_set", &probe);
 
     battery_layer_create(s_calendar_status_layer,
-                         GRect(w - BATTERY_W - PADDING, BATTERY_Y(bounds.size.h), BATTERY_W, BATTERY_H));
+                         GRect(w - BATTERY_W - PADDING, 0, BATTERY_W, bounds.size.h));
     MEMORY_HEAP_PROBE_SAMPLE("after_battery_layer_create", &probe);
 
     layer_add_child(parent_layer, s_calendar_status_layer);

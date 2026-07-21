@@ -12,10 +12,7 @@ Config *g_config;
 // function instead. See: https://gcc.gnu.org/onlinedocs/gcc/Compound-Literals.html
 static Config config_defaults(void) {
     return (Config) {
-        .celsius = false,
         .time_lead_zero = false,
-        .axis_12h = false,
-        .start_mon = false,
         .prev_week = true,
         .show_qt = true,
         .show_bt = true,
@@ -24,9 +21,8 @@ static Config config_defaults(void) {
         .show_am_pm = false,
         .time_font = TIME_FONT_ROBOTO,
         .color_today = GColorBlack,
-        .color_saturday = GColorFolly,
-        .color_sunday = GColorFolly,
-        .color_us_federal = GColorFolly,
+        .color_saturday = GColorOrange,
+        .color_sunday = GColorRed,
         .color_time = GColorWhite,
         .day_night_shading = true
     };
@@ -55,42 +51,32 @@ void config_unload() {
 }
 
 int config_localize_temp(int temp_f) {
-    // Convert temperatures as desired
-    int result;
-    if (g_config->celsius)
-        result = f_to_c(temp_f);
-    else
-        result = temp_f;
-    return result;
+    // Always display temperatures in Celsius.
+    return f_to_c(temp_f);
 }
 
 int config_format_time(char *s, size_t maxsize, const struct tm * tm_p) {
-    int res = strftime(s, maxsize, watch_services_clock_is_24h_style() ? "%H:%M" : "%I:%M", tm_p);
+    // Always use a 24 hour clock.
+    int res = strftime(s, maxsize, "%H:%M", tm_p);
     if (!g_config->time_lead_zero) {
         // Remove leading zero if configured as such
-        if (s[0] == '0') 
+        if (s[0] == '0')
             memmove(s, s+1, strlen(s));
     }
     return res;
 }
 
 int config_axis_hour(int hour) {
-    if (g_config->axis_12h) {
-        hour = hour % 12;
-        hour = hour == 0 ? 12 : hour;
-    }
-    else 
-        hour = hour % 24;
-    return hour;
+    // Always use a 24 hour axis.
+    return hour % 24;
 }
 
 int config_n_today() {
     // Returns the index of the calendar box that holds today's date
 
     struct tm tm_today = watch_services_localtime();
-    int wday = tm_today.tm_wday;
-    // Offset if user wants to start the week on monday
-    wday = g_config->start_mon ? (wday + 6) % 7 : wday;
+    // Week always starts on Monday
+    int wday = (tm_today.tm_wday + 6) % 7;
     // Offset if user wants to show the previous week first
     if (g_config->prev_week)
         wday += 7;
@@ -113,10 +99,6 @@ GFont config_time_font() {
     if (font_index < 0 || font_index >= font_count)
         font_index = TIME_FONT_ROBOTO;
     return fonts_get_system_font(font_keys[font_index]);
-}
-
-bool config_highlight_holidays() {
-    return !gcolor_equal(g_config->color_us_federal, GColorWhite);
 }
 
 bool config_highlight_sundays() {

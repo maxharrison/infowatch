@@ -29,23 +29,6 @@ module.exports = [
             },
             {
                 "type": "select",
-                "label": "Axis time format",
-                "messageKey": "axisTimeFormat",
-                "defaultValue": "24h",
-                "description": "Tip: go to Settings > Date & Time > Time Format on your watch to change the main time format",
-                "options": [
-                    {
-                        "label": "12h",
-                        "value": "12h"
-                    },
-                    {
-                        "label": "24h",
-                        "value": "24h"
-                    }
-                ]
-            },
-            {
-                "type": "select",
                 "label": "Main time font",
                 "messageKey": "timeFont",
                 "defaultValue": "roboto",
@@ -83,22 +66,6 @@ module.exports = [
             },
             {
                 "type": "select",
-                "label": "Start week on",
-                "messageKey": "weekStartDay",
-                "defaultValue": "sun",
-                "options": [
-                    {
-                        "label": "Sunday",
-                        "value": "sun"
-                    },
-                    {
-                        "label": "Monday",
-                        "value": "mon"
-                    }
-                ]
-            },
-            {
-                "type": "select",
                 "label": "First week to display",
                 "messageKey": "firstWeek",
                 "defaultValue": "prev",
@@ -126,7 +93,7 @@ module.exports = [
                 "type": "color",
                 "label": "Sunday color",
                 "messageKey": "colorSunday",
-                "defaultValue": "#FF0055",
+                "defaultValue": "#FF0000",
                 "sunlight": false,
                 "capabilities": ["COLOR"]
             },
@@ -134,16 +101,7 @@ module.exports = [
                 "type": "color",
                 "label": "Saturday color",
                 "messageKey": "colorSaturday",
-                "defaultValue": "#FF0055",
-                "sunlight": false,
-                "capabilities": ["COLOR"]
-            },
-            {
-                "type": "color",
-                "label": "US federal holidays color",
-                "messageKey": "colorUSFederal",
-                "defaultValue": "#FF0055",
-                "description": "White means disable",
+                "defaultValue": "#FF5500",
                 "sunlight": false,
                 "capabilities": ["COLOR"]
             },
@@ -155,22 +113,6 @@ module.exports = [
             {
                 "type": "heading",
                 "defaultValue": "Weather"
-            },
-            {
-                "type": "select",
-                "defaultValue": "f",
-                "messageKey": "temperatureUnits",
-                "label": "Temperature Units",
-                "options": [
-                    {
-                        "label": "°F",
-                        "value": "f"
-                    },
-                    {
-                        "label": "°C",
-                        "value": "c"
-                    }
-                ]
             },
             {
                 "type": "toggle",

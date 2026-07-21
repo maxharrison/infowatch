@@ -13,13 +13,11 @@
     }
   },
   "watchSettings": {
-    "timeFormat": "12h"
+    "timeFormat": "24h"
   },
   "claySettings": {
-    "axisTimeFormat": "12h",
-    "colorSaturday": "GColorFolly",
-    "colorSunday": "GColorFolly",
-    "colorUSFederal": "GColorFolly"
+    "colorSaturday": "GColorOrange",
+    "colorSunday": "GColorRed"
   },
   "weather": {
     "city": "Chicago",

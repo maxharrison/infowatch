@@ -71,10 +71,7 @@
       "CITY",
       "SUN_EVENTS",
       "WATCH_HAS_FORECAST_DATA",
-      "CLAY_CELSIUS",
       "CLAY_TIME_LEAD_ZERO",
-      "CLAY_AXIS_12H",
-      "CLAY_START_MON",
       "CLAY_COLOR_TODAY",
       "CLAY_PREV_WEEK",
       "CLAY_TIME_FONT",
@@ -85,7 +82,6 @@
       "CLAY_SHOW_AM_PM",
       "CLAY_COLOR_SATURDAY",
       "CLAY_COLOR_SUNDAY",
-      "CLAY_COLOR_US_FEDERAL",
       "CLAY_COLOR_TIME",
       "CLAY_DAY_NIGHT_SHADING"
     ]
