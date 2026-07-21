@@ -1,7 +1,7 @@
 {
-  "name": "forecaswatch2",
-  "author": "Matt Rossman",
-  "version": "1.34.0",
+  "name": "max-infowatch",
+  "author": "Max Harrison",
+  "version": "3.0.0",
   "keywords": [
     "pebble-app"
   ],
@@ -10,16 +10,12 @@
     "suncalc": "^1.9.0"
   },
   "pebble": {
-    "displayName": "FCW2",
-    "uuid": "7ed9b053-1521-4e49-be8b-6e12c68978ae",
+    "displayName": "InfoWatch",
+    "uuid": "1fba3d72-6985-42e3-8d40-2aba4376beb2",
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
-      "aplite",
-      "basalt",
-      "diorite",
-      "emery",
-      "flint"
+      "emery"
     ],
     "watchapp": {
       "watchface": true
