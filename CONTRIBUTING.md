@@ -11,205 +11,53 @@ mise install
 # Install JS dependencies
 npm install
 
-# Build dev (default)
+# Build
 mise build
-
-# Build release
-mise build release
 ```
 
 This builds the project with the Pebble SDK version pinned in `pebble-sdk-version` and provisioned by the repo scripts. The `.pbw` output can be found in the `build` directory.
 
-## Supabase (telemetry)
+## Project manifest
 
-Telemetry uses Supabase Edge Functions + Postgres.
+`package.json` is a plain, committed Pebble manifest (top-level `pebble` object). It is checked in so the project can be imported and built directly by [CloudPebble](https://cloudpebble.net) — add this GitHub repo as a source and it builds without any local tooling.
 
-Install/update the CLI through mise's aqua backend (already pinned in `mise.toml`):
+`src/pkjs/active-fixture.generated.js` (default `module.exports = null`) is committed for the same reason, since `src/pkjs/index.js` requires it unconditionally. Local fixture builds overwrite it; don't commit that regenerated version. Restore the committed default with `FIXTURE= node scripts/prepare-fixture.js`.
 
-```bash
-mise install
-supabase --version
-```
-
-Create a local telemetry hash secret (`TELEMETRY_HASH_SECRET`):
-
-```bash
-openssl rand -hex 32
-```
-
-Use this value for `TELEMETRY_HASH_SECRET`.
-
-### Local stack and emulator testing
-
-Start the local Supabase stack from the repo root:
-
-```bash
-supabase start
-```
-
-Copy `.env.example` to `.env`, then populate the telemetry keys there:
-
-```bash
-cp .env.example .env
-```
-
-Serve the telemetry edge function locally (from repo root):
-
-```bash
-mise telemetry-serve
-```
-
-For emulator validation, run:
-
-```bash
-mise install-emulator --logs
-```
-
-To verify inserts locally, open Supabase Studio at `http://127.0.0.1:54323` and inspect `public.telemetry_weather_fetch`.
-
-### Hosted deployment (Supabase cloud)
-
-Authenticate and link the repo to your Supabase project:
-
-```bash
-supabase login
-supabase link --project-ref <your-project-ref>
-```
-
-Set function secrets in the hosted project:
-
-```bash
-supabase secrets set \
-  TELEMETRY_HASH_SECRET=<paste-openssl-value>
-```
-
-Apply database migrations:
-
-```bash
-supabase db push --dry-run
-supabase db push
-```
-
-Deploy the telemetry function:
-
-```bash
-supabase functions deploy telemetry-ingest
-```
-
-Wire release and preview builds to hosted telemetry by setting repository secret(s) used by CI workflows:
-
-- `TELEMETRY_ENDPOINT=https://<your-project-ref>.supabase.co/functions/v1/telemetry-ingest`
-
-### Optional: Supabase GitHub integration
-
-If you use Supabase GitHub sync/branching, Supabase can auto-apply migrations and deploy functions from the `supabase/` directory when branches/PRs update. Enable it in Supabase Dashboard > Project Settings > Integrations.
-
-`package.json` is generated from `package.template.json` and profile data in `profiles/`.
-
-- Release profile: `profiles/package.release.json`
-- Dev profile: `profiles/package.dev.json`
-
-`mise build` and `mise build release` automatically generate `package.json` from the template/profile before building.
-
-A committed `package.json` (rendered from the **release** profile, telemetry disabled) is checked into the repo so the project can be imported and built directly by [CloudPebble](https://cloudpebble.net) — add this GitHub repo as a source and it builds without any local tooling. `src/pkjs/active-fixture.generated.js` (default `module.exports = null`) is committed for the same reason, since `src/pkjs/index.js` requires it unconditionally. Local dev builds overwrite both files (dev UUID/displayName, or a `FIXTURE`); don't commit those regenerated versions. Run `mise prepare-package release && FIXTURE= node scripts/prepare-fixture.js` to restore the committed state before committing.
-
-If you want the extra Pebble heap debug logs, set `ENABLE_MEMORY_LOGGING=1` in your `.env` before building or installing. This is independent of the dev/release package profile.
+If you want the extra Pebble heap debug logs, set `ENABLE_MEMORY_LOGGING=1` in your `.env` before building or installing.
 
 For deterministic emulator UI, set `FIXTURE=<name>` in `.env` before building or installing. Fixture files live in `fixtures/<name>.json` and define the watch facts and weather payload used by local builds.
 
-Release notification copy (optional “what’s new” toast on upgrade) lives in `release-notifications.json`, keyed by the exact `version` string from the template (e.g. `"1.26.0"`); use `dev-config.js` `maxNotifiedVersion` to simulate skipped-version upgrades locally.
-
-If you want to regenerate `package.json` without building:
-
-```bash
-mise prepare-package           # dev profile (default)
-mise prepare-package release   # release profile
-```
+## Install tasks
 
 You can run Pebble CLI commands directly, or use install tasks that build and install in one command:
 
 ```bash
-# Option 1: set once in .env
-cp .env.example .env
-# then edit .env and set IP=<PHONE_IP>
-# this installs the dev build by default
+# Install on phone (set IP in .env, or pass it explicitly)
+cp .env.example .env   # then edit .env and set IP=<PHONE_IP>
 mise install-phone
-
-# Option 2: pass IP explicitly
 mise install-phone <PHONE_IP>
-
-# Explicit release install
-mise install-phone <PHONE_IP> release
 
 # Pass through pebble install flags
 mise install-phone --logs
+mise install-phone -- --logs   # legacy separator, still works
 
-# Legacy pass-through separator (still works)
-mise install-phone -- --logs
-
-# Install dev build via CloudPebble (default profile)
+# Install via CloudPebble
 mise install-cloud
 
-# Explicit release install via CloudPebble
-mise install-cloud release
-
-# Install dev build to emulator (defaults: profile=dev, emulator=basalt)
+# Install to emulator (default emulator: basalt)
 mise install-emulator
-
-# Choose emulator platform
-mise install-emulator aplite
-
-# Choose emulator build type
-mise install-emulator release
-
-# Choose emulator platform and build type
-mise install-emulator release aplite
-
-# Pass through pebble install flags
-mise install-emulator --logs
-
-# Set default emulator in environment
+mise install-emulator aplite            # choose platform
 PEBBLE_EMULATOR=aplite mise install-emulator
-
-# Legacy pass-through separator (still works)
-mise install-emulator -- --logs
+mise install-emulator --logs            # pass through pebble flags
 
 # Stop running emulator and phone simulator
 mise kill-emulator
-
-# Take a screenshot from emulator (default platform: basalt)
-mise screenshot-emulator
-
-# Choose emulator platform
-mise screenshot-emulator aplite
-
-# Legacy flag form (still works)
-mise screenshot-emulator -- --emulator chalk
-
-# Set default emulator in environment
-PEBBLE_EMULATOR=aplite mise screenshot-emulator
-
-# Default output goes to screenshot/tmp/<timestamp>-<platform>.png
-
-# Provide explicit output path / additional screenshot args
-mise screenshot-emulator -- screenshot/my-capture.png --no-open --no-correction
-
-# Take a screenshot from phone
-mise screenshot-phone
-
-# Or pass IP explicitly
-mise screenshot-phone <PHONE_IP>
-
-# Default output goes to screenshot/tmp/<timestamp>.png
-
-# Provide explicit output path / additional screenshot args
-mise screenshot-phone -- screenshot/my-capture.png
 ```
 
 ## Config
-Local dev config has three layers:
 
-- Use `.env` to choose the local mode or scenario, such as `FIXTURE=readme`.
+Local dev config has two layers:
+
 - Use `fixtures/*.json` for committed, deterministic UI state: watch facts, Clay render settings, weather payloads, and other data that should make emulator screenshots reproducible.
 - Use `src/pkjs/dev-config.js` for uncommitted behavior testing, including preloaded Clay settings when you are exercising real app flows instead of deterministic fixture UI.
 
@@ -233,29 +81,7 @@ Example:
 module.exports.clearPkjsStorageOnBoot = true;
 ```
 
-Notes:
-
-- Keep this set to `true` only while testing first-install behavior.
-- Set it back to `false` before testing upgrade-notification behavior.
-- This is local-only dev behavior and is not written into Clay settings.
-
-### Release notification preview (dev)
-
-Use this key in `src/pkjs/dev-config.js` to always show the notification for a **specific version key** from `release-notifications.json` on every app boot (ignores upgrade gating):
-
-- `forceShowReleaseNotificationOnBoot = '1.26.0'` (string must match a key in `release-notifications.json` exactly)
-
-Example:
-
-```javascript
-module.exports.forceShowReleaseNotificationOnBoot = '1.26.0';
-```
-
-Notes:
-
-- Useful when `package.json` is still on an older version but you want to iterate on copy for the next release entry.
-- Remove the key (or comment it out) when testing normal upgrade behavior.
-- This is local-only dev behavior and is not written into Clay settings.
+This is local-only dev behavior and is not written into Clay settings.
 
 ### Fixtures (emulator/dev)
 

@@ -8,34 +8,15 @@ lockfile = true
 # https://mise.jdx.dev/dev-tools/backends/pipx.html
 "pipx:pebble-tool" = "5.0.38"
 
-# https://deno.com/
-deno = "2.1.4"
-
-# https://github.com/supabase/cli
-# https://mise.jdx.dev/dev-tools/backends/aqua.html
-"aqua:supabase/cli" = "2.98.2"
-
-# https://github.com/linebender/resvg
-# https://mise.jdx.dev/dev-tools/backends/aqua.html
-resvg = "0.47.0"
-
 [env]
 _.file = ".env"
-
-[tasks.prepare-package]
-description = "Prepare package.json from profile (default: dev)"
-run = "scripts/prepare-package.sh"
-
-[tasks.telemetry-serve]
-description = "Serve telemetry ingest function locally"
-run = "supabase functions serve telemetry-ingest --env-file .env"
 
 [tasks.clean]
 description = "Clean build artifacts"
 run = "pebble clean"
 
 [tasks.build]
-description = "Build PBW (default: dev)"
+description = "Build PBW"
 run = "scripts/build.sh"
 
 [tasks.rebuild]
@@ -43,17 +24,17 @@ description = "Clean and rebuild PBW"
 run = "pebble clean && scripts/build.sh"
 
 [tasks.install-phone]
-description = "Build and install dev build on phone"
+description = "Build and install on phone"
 alias = "install"
 run = "scripts/install-phone.sh"
 
 [tasks.install-cloud]
-description = "Build and install on CloudPebble (default: dev)"
+description = "Build and install on CloudPebble"
 alias = "cloud"
 run = "scripts/install-cloud.sh"
 
 [tasks.install-emulator]
-description = "Build and install on emulator (default profile: dev, emulator: basalt)"
+description = "Build and install on emulator (default emulator: basalt)"
 alias = "emu"
 run = "pebble wipe && scripts/install-emulator.sh"
 
@@ -61,20 +42,3 @@ run = "pebble wipe && scripts/install-emulator.sh"
 description = "Stop running emulator and phone simulator"
 alias = "kill"
 run = "pebble kill"
-
-[tasks.screenshot-phone]
-description = "Take a screenshot from phone"
-run = "scripts/screenshot-phone.sh"
-
-[tasks.screenshot-emulator]
-description = "Take a screenshot from emulator (default: basalt)"
-alias = "screenshot"
-run = "scripts/screenshot-emulator.sh"
-
-[tasks.composite-screenshot]
-description = "Composite a screenshot PNG into an SVG Pebble frame"
-run = "screenshot/composite_svg.sh"
-
-[tasks.composite]
-description = "Composite all raw screenshots for a screenshot version"
-run = "scripts/composite-version.sh"
