@@ -102,6 +102,7 @@ OpenWeatherMapProvider.prototype.withProviderData = function(lat, lon, force, on
         });
         this.startTime = weatherData.hourly[0].dt;
         this.currentTemp = weatherData.current.temp;
+        this.uvIndex = weatherData.current.uvi;
         onSuccess();
     }).bind(this), onFailure);
 };

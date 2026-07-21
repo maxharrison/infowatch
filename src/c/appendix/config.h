@@ -8,6 +8,9 @@ enum TimeFont {
     TIME_FONT_BITHAM = 2,
 };
 
+// Max length (including null terminator) for the user-defined second city label.
+#define SECOND_CITY_LABEL_MAX 8
+
 typedef struct {
     bool time_lead_zero;
     bool prev_week;
@@ -22,6 +25,12 @@ typedef struct {
     GColor color_sunday;
     GColor color_time;
     bool day_night_shading;
+    // Second city time (a user-defined timezone shown below the main clock).
+    // New fields are appended to the end of the struct so older persisted
+    // configs (written before these existed) stay backward compatible.
+    bool second_city_enabled;
+    int16_t second_city_offset;  // Minutes from UTC (e.g. Bangkok = +420)
+    char second_city_label[SECOND_CITY_LABEL_MAX];
 } Config;
 
 extern Config *g_config;

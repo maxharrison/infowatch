@@ -182,6 +182,9 @@ function sendClaySettings(onSuccess, onFailure) {
         "CLAY_COLOR_SATURDAY": app.settings.hasOwnProperty('colorSaturday') ? app.settings.colorSaturday : DEFAULT_COLOR_SATURDAY,
         "CLAY_COLOR_TIME": app.settings.hasOwnProperty('colorTime') ? app.settings.colorTime : DEFAULT_COLOR_WHITE,
         "CLAY_DAY_NIGHT_SHADING": app.settings.hasOwnProperty('dayNightShading') ? app.settings.dayNightShading : true,
+        "CLAY_SECOND_CITY_ENABLED": Boolean(app.settings.secondCityEnabled),
+        "CLAY_SECOND_CITY_OFFSET": parseInt(app.settings.secondCityOffset, 10) || 0,
+        "CLAY_SECOND_CITY_LABEL": app.settings.secondCityLabel || '',
     }
     Pebble.sendAppMessage(payload, function() {
         console.log('Message sent successfully: ' + JSON.stringify(payload));
@@ -281,7 +284,10 @@ function getDefaultClaySettings() {
         colorSaturday: DEFAULT_COLOR_SATURDAY,
         showQt: true,
         vibe: false,
-        btIcons: 'both'
+        btIcons: 'both',
+        secondCityEnabled: false,
+        secondCityLabel: '',
+        secondCityOffset: '0'
     };
 }
 
@@ -442,6 +448,9 @@ function getFixtureWeatherPayload(fixture) {
     provider.numEntries = Array.isArray(weather.temps) ? weather.temps.length : 0;
     provider.cityName = weather.city || 'Fixture City';
     provider.currentTemp = weather.currentTemp;
+    if (typeof weather.uv === 'number') {
+        provider.uvIndex = weather.uv;
+    }
     provider.startTime = weather.startEpoch;
     provider.tempTrend = Array.isArray(weather.temps) ? weather.temps.slice(0) : [];
     provider.precipTrend = Array.isArray(weather.precipPct) ? weather.precipPct.map(function(probabilityPercent) {

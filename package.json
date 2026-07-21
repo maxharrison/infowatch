@@ -69,6 +69,7 @@
       "NUM_ENTRIES",
       "CURRENT_TEMP",
       "CITY",
+      "UV_INDEX",
       "SUN_EVENTS",
       "WATCH_HAS_FORECAST_DATA",
       "CLAY_TIME_LEAD_ZERO",
@@ -83,7 +84,10 @@
       "CLAY_COLOR_SATURDAY",
       "CLAY_COLOR_SUNDAY",
       "CLAY_COLOR_TIME",
-      "CLAY_DAY_NIGHT_SHADING"
+      "CLAY_DAY_NIGHT_SHADING",
+      "CLAY_SECOND_CITY_ENABLED",
+      "CLAY_SECOND_CITY_OFFSET",
+      "CLAY_SECOND_CITY_LABEL"
     ]
   }
 }

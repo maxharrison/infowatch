@@ -139,6 +139,9 @@ WundergroundProvider.prototype.withProviderData = function(lat, lon, force, onSu
                 });
                 this.startTime = forecast[0].fcst_valid;
                 this.currentTemp = currentTemp;
+                // Weather Underground's hourly forecast exposes a per-hour UV
+                // index; the first entry is the current hour.
+                this.uvIndex = forecast[0].uv_index;
                 onSuccess();
             }).bind(this), onFailure);
         }).bind(this), onFailure);

@@ -13,9 +13,11 @@ Open source revival of the beloved ForecasWatch watchface. This includes support
 ## Features
 
 * Current time
+* Second city time (a configurable timezone shown below the main clock)
 * Battery indicator
-* 3 week calendar
+* Current week calendar (single row)
 * 24 hour weather forecast (updates every 30 minutes)
+* Current UV index
 * Bluetooth connection indicator
 * Vibrate on disconnect
 * Quiet time indicator
