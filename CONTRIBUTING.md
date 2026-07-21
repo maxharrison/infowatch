@@ -2,17 +2,31 @@
 
 ## Building
 
-Prerequisites: [Node.js](https://nodejs.org/en/) and [mise](https://mise.jdx.dev/)
+Prerequisites: [Node.js](https://nodejs.org/en/) and the Pebble toolchain.
+
+Install the toolchain (Debian/Ubuntu):
 
 ```bash
-# Install toolchain from mise.toml
-mise install
+# ARM toolchain + pipx (the Pebble SDK uses the system arm-none-eabi-gcc)
+sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi pipx
 
+# pebble-tool — install via pipx, NOT system pip
+# (system pip fails building the pyqrcode dep against Debian's patched setuptools)
+export PATH="$HOME/.local/bin:$PATH"
+pipx install pebble-tool==5.0.38
+
+# Pre-download the pinned SDK (from pebble-sdk-version)
+yes | pebble sdk install "$(cat pebble-sdk-version)"
+```
+
+Then build:
+
+```bash
 # Install JS dependencies
 npm install
 
 # Build
-mise build
+make build
 ```
 
 This builds the project with the Pebble SDK version pinned in `pebble-sdk-version` and provisioned by the repo scripts. The `.pbw` output can be found in the `build` directory.
@@ -34,24 +48,23 @@ You can run Pebble CLI commands directly, or use install tasks that build and in
 ```bash
 # Install on phone (set IP in .env, or pass it explicitly)
 cp .env.example .env   # then edit .env and set IP=<PHONE_IP>
-mise install-phone
-mise install-phone <PHONE_IP>
+make install-phone
+scripts/install-phone.sh <PHONE_IP>
 
 # Pass through pebble install flags
-mise install-phone --logs
-mise install-phone -- --logs   # legacy separator, still works
+scripts/install-phone.sh --logs
 
 # Install via CloudPebble
-mise install-cloud
+make install-cloud
 
 # Install to emulator (default emulator: basalt)
-mise install-emulator
-mise install-emulator aplite            # choose platform
-PEBBLE_EMULATOR=aplite mise install-emulator
-mise install-emulator --logs            # pass through pebble flags
+make install-emulator
+scripts/install-emulator.sh aplite            # choose platform
+PEBBLE_EMULATOR=aplite scripts/install-emulator.sh
+scripts/install-emulator.sh --logs            # pass through pebble flags
 
 # Stop running emulator and phone simulator
-mise kill-emulator
+make kill-emulator
 ```
 
 ## Config
@@ -113,16 +126,15 @@ Fixture data is tracked in git inside `fixtures/`.
 Fixture time and battery state are compiled into the app through `watch.now` and `watch.battery`; `scripts/install-emulator.sh` does not call Pebble's emulator setting controls.
 
 ```bash
-mise install-emulator --logs
+scripts/install-emulator.sh --logs
 ```
 
 ## Upgrading pebble-tool
 
-This project pins `pipx:pebble-tool` to an exact version in `mise.toml` (fully resolved in `mise.lock`).
+This project pins `pebble-tool` to an exact version (installed via pipx; see the build prerequisites above).
 
-To bump the pinned version:
+To bump the pinned version, install the new version and update the references in `CONTRIBUTING.md` and `CLAUDE.md`:
 
 ```bash
-mise upgrade "pipx:pebble-tool" --bump
-mise install
+pipx install --force pebble-tool==<new-version>
 ```

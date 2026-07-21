@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source "$(dirname "$0")/load-env.sh"
+
 ip="${IP:-}"
 install_args=()
 ip_set_from_arg=0
@@ -35,9 +37,16 @@ if [[ -z "$ip" ]]; then
   exit 1
 fi
 
-mise run build
+scripts/build.sh
+
+pbw="$(ls build/*.pbw 2>/dev/null | head -n1)"
+if [[ -z "$pbw" ]]; then
+  echo "No .pbw found in build/ after build" >&2
+  exit 1
+fi
+
 if ((${#install_args[@]})); then
-  pebble install build/forecaswatch2.pbw --phone "$ip" "${install_args[@]}"
+  pebble install "$pbw" --phone "$ip" "${install_args[@]}"
 else
-  pebble install build/forecaswatch2.pbw --phone "$ip"
+  pebble install "$pbw" --phone "$ip"
 fi
