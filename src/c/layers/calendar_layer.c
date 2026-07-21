@@ -4,7 +4,7 @@
 #include "c/services/watch_services.h"
 #include <time.h>
 
-#define NUM_WEEKS 3
+#define NUM_WEEKS 1
 #define DAYS_PER_WEEK 7
 #define FONT_OFFSET 5
 #define EMERY_CALENDAR_TEXT_SHIFT_Y 5

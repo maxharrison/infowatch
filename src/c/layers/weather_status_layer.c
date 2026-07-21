@@ -27,11 +27,13 @@
 
 static GRect frame_curr_temp;
 static GRect frame_sun_event;
+static GRect frame_uv;
 
 static Layer *s_weather_status_layer;
 static TextLayer *s_city_layer;
 static TextLayer *s_current_temp_layer;
 static TextLayer *s_next_sun_event_layer;
+static TextLayer *s_uv_layer;
 
 static GPath *s_arrow_path = NULL;
 static const GPathInfo ARROW_PATH_INFO = {
@@ -51,6 +53,38 @@ static void text_layer_move_frame(TextLayer *text_layer, GRect frame) {
     layer_set_frame(text_layer_get_layer(text_layer), frame);
 }
 
+static void uv_layer_refresh() {
+    // Small UV reading placed just to the right of the current temperature.
+    // A stored value < 0 means the active provider did not supply UV data,
+    // so the layer is hidden and takes up no horizontal space.
+    int uv = persist_get_uv_index();
+    bool show = (uv >= 0);
+    layer_set_hidden(text_layer_get_layer(s_uv_layer), !show);
+
+    int temp_right = frame_curr_temp.origin.x + frame_curr_temp.size.w;
+    if (!show) {
+        frame_uv = GRect(temp_right, 0, 0, 0);
+        return;
+    }
+
+    static char s_uv_buffer[8];
+    snprintf(s_uv_buffer, sizeof(s_uv_buffer), "UV%d", uv);
+    text_layer_set_text(s_uv_layer, s_uv_buffer);
+
+    text_layer_move_frame(s_uv_layer, GRect(0, 0, 60, 30));  // Big first so content isn't clipped
+    GSize size = text_layer_get_content_size(s_uv_layer);
+    int y;
+    // emery: match the 18px baseline used by the other emery status text.
+#ifdef PBL_PLATFORM_EMERY
+    y = -FONT_18_OFFSET;
+#else
+    y = -FONT_14_OFFSET;
+#endif
+    int x = temp_right + MARGIN;
+    text_layer_move_frame(s_uv_layer, GRect(x, y, size.w, size.h));
+    frame_uv = GRect(x, y, size.w, size.h);
+}
+
 static void city_layer_refresh() {
     // Set the city text layer contents from storage
     static char s_city_buffer[20];
@@ -60,7 +94,11 @@ static void city_layer_refresh() {
     // Dynamic resizing
     GRect bounds = layer_get_bounds(s_weather_status_layer);
     GSize size = text_layer_get_content_size(s_city_layer);
-    int x = frame_curr_temp.origin.x + frame_curr_temp.size.w + MARGIN * 2;
+    // Horizontal space taken by the UV reading (0 when it is hidden), so the
+    // centered city text starts after it and shrinks by the same amount.
+    int temp_right = frame_curr_temp.origin.x + frame_curr_temp.size.w;
+    int uv_extent = frame_uv.size.w > 0 ? (frame_uv.origin.x + frame_uv.size.w - temp_right) : 0;
+    int x = temp_right + uv_extent + MARGIN * 2;
     int y;
     int h;
     // emery: align city text baseline with 18px font metrics instead of 14px metrics.
@@ -71,7 +109,7 @@ static void city_layer_refresh() {
     y = -FONT_14_OFFSET;
     h = size.h + FONT_14_OFFSET;
 #endif
-    int w = bounds.size.w - frame_curr_temp.size.w - frame_sun_event.size.w - MARGIN * 4;
+    int w = bounds.size.w - frame_curr_temp.size.w - uv_extent - frame_sun_event.size.w - MARGIN * 4;
     text_layer_move_frame(s_city_layer, GRect(x, y, w, h));
 }
 
@@ -141,7 +179,15 @@ static void weather_status_layer_init(GRect bounds) {
     text_layer_set_text_color(s_next_sun_event_layer, GColorWhite);
     text_layer_set_font(s_next_sun_event_layer, fonts_get_system_font(SUN_EVENT_FONT_KEY));
 
+    // Current UV index (small, shown next to the temperature)
+    s_uv_layer = text_layer_create(GRect(MARGIN, -FONT_14_OFFSET, 40, 25));
+    text_layer_set_background_color(s_uv_layer, GColorClear);
+    text_layer_set_text_alignment(s_uv_layer, GTextAlignmentLeft);
+    text_layer_set_text_color(s_uv_layer, GColorWhite);
+    text_layer_set_font(s_uv_layer, fonts_get_system_font(CITY_FONT_KEY));
+
     current_temp_layer_refresh();
+    uv_layer_refresh();
     sun_event_layer_refresh();
     city_layer_refresh();
 }
@@ -186,6 +232,7 @@ void weather_status_layer_create(Layer* parent_layer, GRect frame) {
     weather_status_layer_init(bounds);
     layer_add_child(s_weather_status_layer, text_layer_get_layer(s_city_layer));
     layer_add_child(s_weather_status_layer, text_layer_get_layer(s_current_temp_layer));
+    layer_add_child(s_weather_status_layer, text_layer_get_layer(s_uv_layer));
     layer_add_child(s_weather_status_layer, text_layer_get_layer(s_next_sun_event_layer));
     layer_set_update_proc(s_weather_status_layer, weather_status_update_proc);
 
@@ -197,6 +244,7 @@ void weather_status_layer_create(Layer* parent_layer, GRect frame) {
 void weather_status_layer_refresh() {
     layer_mark_dirty(s_weather_status_layer);
     current_temp_layer_refresh();
+    uv_layer_refresh();
     sun_event_layer_refresh();
     city_layer_refresh();
     MEMORY_LOG_HEAP("after_weather_refresh");
@@ -206,6 +254,7 @@ void weather_status_layer_destroy() {
     MEMORY_LOG_HEAP("weather_status_layer_destroy:before");
     text_layer_destroy(s_city_layer);
     text_layer_destroy(s_current_temp_layer);
+    text_layer_destroy(s_uv_layer);
     text_layer_destroy(s_next_sun_event_layer);
     if (s_arrow_path) {
         gpath_destroy(s_arrow_path);

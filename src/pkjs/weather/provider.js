@@ -607,6 +607,9 @@ WeatherProvider.prototype.getPayload = function() {
         NUM_ENTRIES: this.numEntries,
         CURRENT_TEMP: Math.round(this.currentTemp),
         CITY: this.cityName,
+        // UV index, rounded to a whole number. -1 signals "unknown" so the
+        // watch can hide it when a provider does not supply UV data.
+        UV_INDEX: (typeof this.uvIndex === 'number' && isFinite(this.uvIndex)) ? Math.round(this.uvIndex) : -1,
         // The first byte determines whether the list of events starts on a sunrise (0) or sunset (1)
         SUN_EVENTS: [this.sunEvents[0].type === 'sunrise' ? 0 : 1].concat(sunEventsByteArray)
     };

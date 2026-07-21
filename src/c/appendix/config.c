@@ -24,7 +24,10 @@ static Config config_defaults(void) {
         .color_saturday = GColorOrange,
         .color_sunday = GColorRed,
         .color_time = GColorWhite,
-        .day_night_shading = true
+        .day_night_shading = true,
+        .second_city_enabled = false,
+        .second_city_offset = 0,
+        .second_city_label = ""
     };
 }
 
@@ -72,14 +75,13 @@ int config_axis_hour(int hour) {
 }
 
 int config_n_today() {
-    // Returns the index of the calendar box that holds today's date
+    // Returns the index of the calendar box that holds today's date.
+    // The calendar now shows only the current week (a single row), so today's
+    // index is simply its position within that week. Week always starts on
+    // Monday. The prev_week config no longer affects the layout.
 
     struct tm tm_today = watch_services_localtime();
-    // Week always starts on Monday
     int wday = (tm_today.tm_wday + 6) % 7;
-    // Offset if user wants to show the previous week first
-    if (g_config->prev_week)
-        wday += 7;
     return wday;
 }
 

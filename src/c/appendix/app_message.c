@@ -19,6 +19,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Tuple *current_temp_tuple = dict_find(iterator, MESSAGE_KEY_CURRENT_TEMP);
     Tuple *city_tuple = dict_find(iterator, MESSAGE_KEY_CITY);
     Tuple *sun_events_tuple = dict_find(iterator, MESSAGE_KEY_SUN_EVENTS);
+    Tuple *uv_index_tuple = dict_find(iterator, MESSAGE_KEY_UV_INDEX);
 
     // Clay config options
     Tuple *clay_time_lead_zero_tuple = dict_find(iterator, MESSAGE_KEY_CLAY_TIME_LEAD_ZERO);
@@ -34,6 +35,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Tuple *clay_color_sunday_tuple = dict_find(iterator, MESSAGE_KEY_CLAY_COLOR_SUNDAY);
     Tuple *clay_color_time_tuple = dict_find(iterator, MESSAGE_KEY_CLAY_COLOR_TIME);
     Tuple *clay_day_night_shading_tuple = dict_find(iterator, MESSAGE_KEY_CLAY_DAY_NIGHT_SHADING);
+    Tuple *clay_second_city_enabled_tuple = dict_find(iterator, MESSAGE_KEY_CLAY_SECOND_CITY_ENABLED);
+    Tuple *clay_second_city_offset_tuple = dict_find(iterator, MESSAGE_KEY_CLAY_SECOND_CITY_OFFSET);
+    Tuple *clay_second_city_label_tuple = dict_find(iterator, MESSAGE_KEY_CLAY_SECOND_CITY_LABEL);
 
     if(temp_trend_tuple && temp_trend_tuple && forecast_start_tuple && num_entries_tuple && city_tuple && sun_events_tuple) {
         // Weather data received
@@ -57,6 +61,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         persist_set_temp_lo(lo);
         persist_set_temp_hi(hi);
         persist_set_current_temp((int)current_temp_tuple->value->int32);
+        // UV index is optional; a missing tuple or -1 means "unknown".
+        persist_set_uv_index(uv_index_tuple ? (int)uv_index_tuple->value->int32 : -1);
         uint8_t sun_event_start_type = (uint8_t) sun_events_tuple->value->uint8;
         time_t *sun_event_times = (time_t*) (sun_events_tuple->value->data + 1);
         persist_set_sun_event_start_type(sun_event_start_type);
@@ -98,8 +104,18 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
             .color_saturday = color_saturday,
             .color_sunday = color_sunday,
             .color_time = color_time,
-            .day_night_shading = day_night_shading
+            .day_night_shading = day_night_shading,
+            .second_city_enabled = clay_second_city_enabled_tuple
+                ? (bool) (clay_second_city_enabled_tuple->value->int16) : false,
+            .second_city_offset = clay_second_city_offset_tuple
+                ? (int16_t) (clay_second_city_offset_tuple->value->int32) : 0,
+            .second_city_label = ""
         };
+        if (clay_second_city_label_tuple) {
+            strncpy(config.second_city_label, clay_second_city_label_tuple->value->cstring,
+                    SECOND_CITY_LABEL_MAX - 1);
+            config.second_city_label[SECOND_CITY_LABEL_MAX - 1] = '\0';
+        }
         persist_set_config(config);
         main_window_refresh();
     }
