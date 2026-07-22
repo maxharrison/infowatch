@@ -23,11 +23,6 @@ module.exports = [
                 "messageKey": "timeLeadingZero",
             },
             {
-                "type": "toggle",
-                "label": "Show AM/PM",
-                "messageKey": "timeShowAmPm",
-            },
-            {
                 "type": "select",
                 "label": "Main time font",
                 "messageKey": "timeFont",

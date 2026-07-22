@@ -122,7 +122,10 @@ static void battery_update_proc(Layer *layer, GContext *ctx) {
         ctx,
         GRect(battery_x + battery_w - 1, gfx_y + BATTERY_GFX_H / 2 - BATTERY_NUB_H / 2, BATTERY_NUB_W + 1, BATTERY_NUB_H));
 
-    // Draw the battery percentage to the left of the graphic
+    // Draw the battery percentage to the left of the graphic. Anchor it to the
+    // battery outline so it sits snug against the symbol; only when the charging
+    // icon is shown do we back off to leave that icon its slot.
+    int percent_right = (show_power_icon ? gfx_x : battery_x) - PERCENT_GAP;
     char percent_buf[5];
     snprintf(percent_buf, sizeof(percent_buf), "%d", battery_level);
     graphics_context_set_text_color(ctx, GColorWhite);
@@ -130,7 +133,7 @@ static void battery_update_proc(Layer *layer, GContext *ctx) {
         ctx,
         percent_buf,
         fonts_get_system_font(PERCENT_FONT_KEY),
-        GRect(0, PERCENT_TEXT_Y, gfx_x - PERCENT_GAP, h),
+        GRect(0, PERCENT_TEXT_Y, percent_right, h),
         GTextOverflowModeFill,
         GTextAlignmentRight,
         NULL);
