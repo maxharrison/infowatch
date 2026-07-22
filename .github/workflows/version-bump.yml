@@ -1,0 +1,64 @@
+name: Bump version
+
+# Bumps package.json's integer version by 1 per commit pushed to main, then
+# commits the change back as github-actions[bot]. The `if` guard on the job
+# stops that bump commit's own push from re-triggering this workflow.
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: version-bump
+  cancel-in-progress: false
+
+jobs:
+  bump-version:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump integer version
+        env:
+          COMMITS_JSON: ${{ toJson(github.event.commits) }}
+        run: |
+          count=$(echo "$COMMITS_JSON" | jq 'length')
+          if [ -z "$count" ] || [ "$count" -lt 1 ]; then
+            count=1
+          fi
+
+          # Version is stored as "MAJOR.0" — the Pebble waf build script
+          # requires at least a MAJOR.MINOR shape (a bare integer crashes
+          # it), so minor is always pinned at 0 and only major is bumped.
+          current=$(node -p "require('./package.json').version.split('.')[0]")
+          next=$((current + count))
+
+          node -e "
+            const fs = require('fs');
+            for (const file of ['package.json', 'package-lock.json']) {
+              const pkg = JSON.parse(fs.readFileSync(file, 'utf8'));
+              pkg.version = '$next.0';
+              if (file === 'package-lock.json' && pkg.packages && pkg.packages['']) {
+                pkg.packages[''].version = '$next.0';
+              }
+              fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + '\n');
+            }
+          "
+
+          echo "Bumped version: $current -> $next (commits in push: $count)"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to $(node -p "require('./package.json').version")"
+          git push origin HEAD:main
