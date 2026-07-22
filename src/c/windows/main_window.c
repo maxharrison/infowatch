@@ -18,16 +18,14 @@
 #define EMERY_WINDOW_PAD_BOTTOM 4
 // emery: increase top calendar status row height to fit larger month and icon alignment.
 // The calendar now shows a single week (one row), so CALENDAR_HEIGHT is a fixed
-// row height rather than a three-week block. SECOND_CITY_HEIGHT is the small
-// secondary-time band shown just below the main clock.
+// row height rather than a three-week block. The second-city block no longer has
+// its own band: it sits in a fixed strip on the left of the time row.
 #ifdef PBL_PLATFORM_EMERY
 #define CALENDAR_STATUS_HEIGHT 20
 #define CALENDAR_HEIGHT 30
-#define SECOND_CITY_HEIGHT 22
 #else
 #define CALENDAR_STATUS_HEIGHT 13
 #define CALENDAR_HEIGHT 20
-#define SECOND_CITY_HEIGHT 16
 #endif
 
 static Window *s_main_window;
@@ -59,20 +57,20 @@ static void main_window_load(Window *window) {
     int content_w = w - EMERY_WINDOW_PAD_X * 2;
     int forecast_w = w - content_x;
     int content_h = h - EMERY_WINDOW_PAD_TOP - EMERY_WINDOW_PAD_BOTTOM
-            - CALENDAR_STATUS_HEIGHT - CALENDAR_HEIGHT - SECOND_CITY_HEIGHT - WEATHER_STATUS_HEIGHT;
+            - CALENDAR_STATUS_HEIGHT - CALENDAR_HEIGHT - WEATHER_STATUS_HEIGHT;
     int time_h;
     int forecast_h;
     compute_content_layout(content_h, &time_h, &forecast_h);
 
     int calendar_y = content_y + CALENDAR_STATUS_HEIGHT;
     int time_y = calendar_y + CALENDAR_HEIGHT;
-    int second_city_y = time_y + time_h;
-    int weather_status_y = second_city_y + SECOND_CITY_HEIGHT;
+    int weather_status_y = time_y + time_h;
     int forecast_y = weather_status_y + WEATHER_STATUS_HEIGHT;
 
     forecast_layer_create(window_layer, GRect(content_x, forecast_y, forecast_w, forecast_h));
     weather_status_layer_create(window_layer, GRect(content_x, weather_status_y, content_w, WEATHER_STATUS_HEIGHT));
-    second_city_layer_create(window_layer, GRect(content_x, second_city_y, content_w, SECOND_CITY_HEIGHT));
+    // Second-city block: a fixed strip on the left of the time row.
+    second_city_layer_create(window_layer, GRect(content_x, time_y, SECOND_CITY_BLOCK_W, time_h));
     time_layer_create(window_layer, GRect(content_x, time_y, content_w, time_h));
     calendar_layer_create(window_layer, GRect(content_x, calendar_y, content_w, CALENDAR_HEIGHT));
     calendar_status_layer_create(window_layer, GRect(content_x, content_y, content_w, CALENDAR_STATUS_HEIGHT + 1)); // +1 to stop text clipping
@@ -80,15 +78,15 @@ static void main_window_load(Window *window) {
 #else
     int forecast_y = h - FORECAST_HEIGHT;
     int weather_status_y = forecast_y - WEATHER_STATUS_HEIGHT;
-    int second_city_y = weather_status_y - SECOND_CITY_HEIGHT;
-    int time_y = second_city_y - TIME_HEIGHT;
+    int time_y = weather_status_y - TIME_HEIGHT;
 
     forecast_layer_create(window_layer,
             GRect(0, forecast_y, w, FORECAST_HEIGHT));
     weather_status_layer_create(window_layer,
             GRect(0, weather_status_y, w, WEATHER_STATUS_HEIGHT));
+    // Second-city block: a fixed strip on the left of the time row.
     second_city_layer_create(window_layer,
-            GRect(0, second_city_y, w, SECOND_CITY_HEIGHT));
+            GRect(0, time_y, SECOND_CITY_BLOCK_W, TIME_HEIGHT));
     time_layer_create(window_layer,
             GRect(0, time_y, bounds.size.w, TIME_HEIGHT));
     calendar_layer_create(window_layer,

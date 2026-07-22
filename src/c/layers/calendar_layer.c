@@ -22,11 +22,16 @@
 static Layer *s_calendar_layer;
 
 static GRect calendar_cell_rect(GRect bounds, int i) {
-    const int box_w = bounds.size.w / DAYS_PER_WEEK;
-    const int box_h = bounds.size.h / NUM_WEEKS;
-    return GRect((i % DAYS_PER_WEEK) * bounds.size.w / DAYS_PER_WEEK,
-                 (i / DAYS_PER_WEEK) * bounds.size.h / NUM_WEEKS,
-                 box_w, box_h);
+    // Derive each cell from its column/row boundaries so the seven columns tile
+    // the full width with no gaps and the last (Sunday) column always reaches
+    // the right edge, rather than using a fixed width that leaves a remainder.
+    const int col = i % DAYS_PER_WEEK;
+    const int row = i / DAYS_PER_WEEK;
+    const int x0 = col * bounds.size.w / DAYS_PER_WEEK;
+    const int x1 = (col + 1) * bounds.size.w / DAYS_PER_WEEK;
+    const int y0 = row * bounds.size.h / NUM_WEEKS;
+    const int y1 = (row + 1) * bounds.size.h / NUM_WEEKS;
+    return GRect(x0, y0, x1 - x0, y1 - y0);
 }
 
 #ifdef PBL_PLATFORM_EMERY
@@ -99,18 +104,12 @@ static GColor today_color() {
 
 static void calendar_update_proc(Layer *layer, GContext *ctx) {
     GRect bounds = layer_get_bounds(layer);
-    int w = bounds.size.w;
-    int h = bounds.size.h;
-    const int box_w = w / DAYS_PER_WEEK;
-    const int box_h = h / NUM_WEEKS;
 
     // Calculate which box holds today's date
     const int i_today = config_n_today();
 
     graphics_context_set_fill_color(ctx, today_color());
-    graphics_fill_rect(ctx,
-        GRect((i_today % DAYS_PER_WEEK) * w / DAYS_PER_WEEK, (i_today / DAYS_PER_WEEK) * h / NUM_WEEKS,
-        box_w, box_h), 1, GCornersAll);
+    graphics_fill_rect(ctx, calendar_cell_rect(bounds, i_today), 1, GCornersAll);
 
     for (int i = 0; i < NUM_WEEKS * DAYS_PER_WEEK; ++i) {
         struct tm t = relative_tm(i - i_today);

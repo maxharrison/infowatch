@@ -4,7 +4,7 @@
 
 // MINUTES_PER_DAY is provided by pebble.h.
 
-// emery: use a larger secondary font to match the taller band on Emery.
+// emery: use a larger secondary font to match the taller strip on Emery.
 #ifdef PBL_PLATFORM_EMERY
 #define SECOND_CITY_FONT_KEY FONT_KEY_GOTHIC_18
 #else
@@ -12,6 +12,9 @@
 #endif
 
 static TextLayer *s_second_city_layer;
+// The strip allotted to this block (set at creation). The rendered text is
+// vertically centered within it so it lines up beside the main clock.
+static GRect s_frame;
 
 // Format the second city's wall-clock time by applying a fixed UTC offset.
 // Uses the raw UTC epoch (time()) rather than the watch's local time so the
@@ -43,25 +46,37 @@ void second_city_layer_tick() {
         return;
     }
 
-    // "LABEL HH:MM" or just "HH:MM" when no label is configured.
+    // Two stacked lines: the city label on top and the time in small text below
+    // it ("BKK" / "07:34"). With no label configured, only the time is shown.
     static char s_time_buffer[8];
     static char s_buffer[SECOND_CITY_LABEL_MAX + 10];
     format_second_city_time(s_time_buffer, sizeof(s_time_buffer));
 
     if (g_config->second_city_label[0] != '\0') {
-        snprintf(s_buffer, sizeof(s_buffer), "%s %s",
+        snprintf(s_buffer, sizeof(s_buffer), "%s\n%s",
                  g_config->second_city_label, s_time_buffer);
     } else {
         snprintf(s_buffer, sizeof(s_buffer), "%s", s_time_buffer);
     }
     text_layer_set_text(s_second_city_layer, s_buffer);
+
+    // Vertically center the block within its strip so it aligns with the clock.
+    Layer *layer = text_layer_get_layer(s_second_city_layer);
+    layer_set_frame(layer, GRect(s_frame.origin.x, s_frame.origin.y, s_frame.size.w, s_frame.size.h));
+    GSize content = text_layer_get_content_size(s_second_city_layer);
+    int top = s_frame.origin.y + (s_frame.size.h - content.h) / 2;
+    if (top < s_frame.origin.y) {
+        top = s_frame.origin.y;
+    }
+    layer_set_frame(layer, GRect(s_frame.origin.x, top, s_frame.size.w, content.h));
 }
 
 void second_city_layer_create(Layer* parent_layer, GRect frame) {
+    s_frame = frame;
     s_second_city_layer = text_layer_create(frame);
     text_layer_set_background_color(s_second_city_layer, GColorClear);
     text_layer_set_text_color(s_second_city_layer, GColorWhite);
-    text_layer_set_text_alignment(s_second_city_layer, GTextAlignmentCenter);
+    text_layer_set_text_alignment(s_second_city_layer, GTextAlignmentLeft);
     text_layer_set_font(s_second_city_layer, fonts_get_system_font(SECOND_CITY_FONT_KEY));
     second_city_layer_tick();
     layer_add_child(parent_layer, text_layer_get_layer(s_second_city_layer));
