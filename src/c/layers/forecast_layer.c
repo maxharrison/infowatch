@@ -31,6 +31,7 @@
 #define NIGHT_HATCH_COLOR_PRECIP PBL_IF_COLOR_ELSE(GColorBlue, GColorWhite)
 #define NIGHT_BOUNDARY_COLOR PBL_IF_COLOR_ELSE(GColorDarkGray, GColorLightGray)
 #define NIGHT_BOUNDARY_COLOR_PRECIP PBL_IF_COLOR_ELSE(GColorVividCerulean, GColorWhite)
+#define HUMIDITY_LINE_COLOR PBL_IF_COLOR_ELSE(GColorMalachite, GColorWhite)
 #define FORECAST_STEP_SECONDS (60 * 60)
 #define DAY_SECONDS (24 * 60 * 60)
 #define MAX_FORECAST_ENTRIES 24
@@ -74,9 +75,11 @@ static char s_buffer_lo[12];
 static char s_buffer_hi[12];
 static GPoint s_points_temp[MAX_FORECAST_ENTRIES];
 static GPoint s_points_precip[MAX_FORECAST_ENTRIES + 2];
+static GPoint s_points_humidity[MAX_FORECAST_ENTRIES];
 static GPath s_path_precip_area_under;
 static GPath s_path_precip_top;
 static GPath s_path_temp;
+static GPath s_path_humidity;
 
 static RenderSpec make_render_spec()
 {
@@ -490,8 +493,10 @@ static void forecast_update_proc(Layer *layer, GContext *ctx)
     struct tm *forecast_start_local = localtime(&forecast_start);
     int16_t temps[num_entries];
     uint8_t precips[num_entries];
+    uint8_t humidities[num_entries];
     persist_get_temp_trend(temps, num_entries);
     persist_get_precip_trend(precips, num_entries);
+    persist_get_humidity_trend(humidities, num_entries);
 
     // Allocate point arrays for plots
     // Calculate the temperature range
@@ -526,6 +531,11 @@ static void forecast_update_proc(Layer *layer, GContext *ctx)
         int precip = precips[i];
         int precip_h = precip * (h - BOTTOM_AXIS_H) / 100;
         s_points_precip[i] = GPoint(entry_x, h - BOTTOM_AXIS_H - precip_h);
+
+        // Save a point for the humidity reading (shares the 0-100% scale with precipitation)
+        int humidity = humidities[i];
+        int humidity_h = humidity * (h - BOTTOM_AXIS_H) / 100;
+        s_points_humidity[i] = GPoint(entry_x, h - BOTTOM_AXIS_H - humidity_h);
 
         // Save a point for the temperature reading
         int temp = temps[i];
@@ -622,6 +632,15 @@ static void forecast_update_proc(Layer *layer, GContext *ctx)
     graphics_context_set_stroke_width(ctx, 1);
     gpath_draw_outline_open(ctx, &s_path_precip_top);
     MEMORY_HEAP_PROBE_SAMPLE("after_precip_top_draw", &redraw_probe);
+
+    // Draw the humidity line
+    s_path_humidity.num_points = num_entries;
+    s_path_humidity.points = s_points_humidity;
+    MEMORY_HEAP_PROBE_SAMPLE("before_humidity_path_draw", &redraw_probe);
+    graphics_context_set_stroke_color(ctx, HUMIDITY_LINE_COLOR);
+    graphics_context_set_stroke_width(ctx, 1);
+    gpath_draw_outline_open(ctx, &s_path_humidity);
+    MEMORY_HEAP_PROBE_SAMPLE("after_humidity_path_draw", &redraw_probe);
 
     // Draw the temperature line
     s_path_temp.num_points = num_entries;

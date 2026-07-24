@@ -561,9 +561,11 @@ WeatherProvider.prototype.fetch = function(onSuccess, onFailure, force) {
 
 WeatherProvider.prototype.hasValidData = function() {
     // all fields are set
-    if (this.hasOwnProperty('tempTrend') && this.hasOwnProperty('precipTrend') && this.hasOwnProperty('startTime') && this.hasOwnProperty('currentTemp')) {
+    if (this.hasOwnProperty('tempTrend') && this.hasOwnProperty('precipTrend') && this.hasOwnProperty('humidityTrend')
+        && this.hasOwnProperty('startTime') && this.hasOwnProperty('currentTemp')) {
         // trends are filled with enough data
-        if (this.tempTrend.length >= this.numEntries && this.precipTrend.length >= this.numEntries) {
+        if (this.tempTrend.length >= this.numEntries && this.precipTrend.length >= this.numEntries
+            && this.humidityTrend.length >= this.numEntries) {
             console.log('Data from ' + this.name + ' is good, ready to fetch.');
             return true;
         }
@@ -574,6 +576,9 @@ WeatherProvider.prototype.hasValidData = function() {
         }
         if (!this.hasOwnProperty('precipTrend')) {
             console.log('Precipitation trend array was not set properly');
+        }
+        if (!this.hasOwnProperty('humidityTrend')) {
+            console.log('Humidity trend array was not set properly');
         }
         if (!this.hasOwnProperty('startTime')) {
             console.log('Start time value was not set properly');
@@ -594,6 +599,10 @@ WeatherProvider.prototype.getPayload = function() {
     var precips = this.precipTrend.slice(0, this.numEntries).map(function(probability) {
         return Math.round(probability * 100);
     });
+    // Humidity is already a [0,100] percentage from the providers, unlike precipTrend's [0,1] fraction.
+    var humidities = this.humidityTrend.slice(0, this.numEntries).map(function(percent) {
+        return Math.round(percent);
+    });
     var tempsIntView = new Int16Array(temps);
     var tempsByteArray = Array.prototype.slice.call(new Uint8Array(tempsIntView.buffer));
     var sunEventsIntView = new Int32Array(this.sunEvents.map(function(sunEvent) {
@@ -603,6 +612,7 @@ WeatherProvider.prototype.getPayload = function() {
     var payload = {
         TEMP_TREND_INT16: tempsByteArray,
         PRECIP_TREND_UINT8: precips, // Holds values within [0,100]
+        HUMIDITY_TREND_UINT8: humidities, // Holds values within [0,100]
         FORECAST_START: this.startTime,
         NUM_ENTRIES: this.numEntries,
         CURRENT_TEMP: Math.round(this.currentTemp),
