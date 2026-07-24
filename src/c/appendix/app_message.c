@@ -157,7 +157,10 @@ void app_message_init() {
     app_message_register_inbox_dropped(inbox_dropped_callback);
 
     // Open AppMessage
-    const int inbox_size = 256;
+    // 256 was cutting it close once HUMIDITY_TREND_UINT8 (another 24-entry array) was
+    // added to the weather payload alongside TEMP_TREND_INT16/PRECIP_TREND_UINT8/CITY/etc;
+    // bumped to keep margin for longer city names.
+    const int inbox_size = 320;
     const int outbox_size = dict_calc_buffer_size(1, sizeof(uint8_t));
     APP_LOG(APP_LOG_LEVEL_INFO, "AppMessage buffer sizes: inbox=%d outbox=%d", inbox_size, outbox_size);
     app_message_open(inbox_size, outbox_size);

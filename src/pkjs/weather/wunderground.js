@@ -138,7 +138,7 @@ WundergroundProvider.prototype.withProviderData = function(lat, lon, force, onSu
                     return entry.pop / 100.0;
                 });
                 this.humidityTrend = forecast.map(function(entry) {
-                    return entry.relativeHumidity;
+                    return entry.rh;
                 });
                 this.startTime = forecast[0].fcst_valid;
                 this.currentTemp = currentTemp;
