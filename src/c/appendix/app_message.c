@@ -14,6 +14,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // Weather data
     Tuple *temp_trend_tuple = dict_find(iterator, MESSAGE_KEY_TEMP_TREND_INT16);
     Tuple *precip_trend_tuple = dict_find(iterator, MESSAGE_KEY_PRECIP_TREND_UINT8);
+    Tuple *humidity_trend_tuple = dict_find(iterator, MESSAGE_KEY_HUMIDITY_TREND_UINT8);
     Tuple *forecast_start_tuple = dict_find(iterator, MESSAGE_KEY_FORECAST_START);
     Tuple *num_entries_tuple = dict_find(iterator, MESSAGE_KEY_NUM_ENTRIES);
     Tuple *current_temp_tuple = dict_find(iterator, MESSAGE_KEY_CURRENT_TEMP);
@@ -55,6 +56,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         persist_set_temp_trend(temp_data, num_entries);
         uint8_t *precip_data = (uint8_t*) precip_trend_tuple->value->data;
         persist_set_precip_trend(precip_data, num_entries);
+        // Humidity trend is optional; a missing tuple leaves the previously persisted trend in place.
+        if (humidity_trend_tuple) {
+            uint8_t *humidity_data = (uint8_t*) humidity_trend_tuple->value->data;
+            persist_set_humidity_trend(humidity_data, num_entries);
+        }
         persist_set_city((char*)city_tuple->value->cstring);
         int lo, hi;
         min_max(temp_data, num_entries, &lo, &hi);
@@ -151,7 +157,10 @@ void app_message_init() {
     app_message_register_inbox_dropped(inbox_dropped_callback);
 
     // Open AppMessage
-    const int inbox_size = 256;
+    // 256 was cutting it close once HUMIDITY_TREND_UINT8 (another 24-entry array) was
+    // added to the weather payload alongside TEMP_TREND_INT16/PRECIP_TREND_UINT8/CITY/etc;
+    // bumped to keep margin for longer city names.
+    const int inbox_size = 320;
     const int outbox_size = dict_calc_buffer_size(1, sizeof(uint8_t));
     APP_LOG(APP_LOG_LEVEL_INFO, "AppMessage buffer sizes: inbox=%d outbox=%d", inbox_size, outbox_size);
     app_message_open(inbox_size, outbox_size);

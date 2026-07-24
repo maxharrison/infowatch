@@ -137,6 +137,9 @@ WundergroundProvider.prototype.withProviderData = function(lat, lon, force, onSu
                 this.precipTrend = forecast.map(function(entry) {
                     return entry.pop / 100.0;
                 });
+                this.humidityTrend = forecast.map(function(entry) {
+                    return entry.rh;
+                });
                 this.startTime = forecast[0].fcst_valid;
                 this.currentTemp = currentTemp;
                 // Weather Underground's hourly forecast exposes a per-hour UV
