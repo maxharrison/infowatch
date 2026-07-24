@@ -15,53 +15,6 @@ module.exports = [
         "items": [
             {
                 "type": "heading",
-                "defaultValue": "Time",
-            },
-            {
-                "type": "toggle",
-                "label": "Leading zero",
-                "messageKey": "timeLeadingZero",
-            },
-            {
-                "type": "toggle",
-                "label": "Show AM/PM",
-                "messageKey": "timeShowAmPm",
-            },
-            {
-                "type": "select",
-                "label": "Main time font",
-                "messageKey": "timeFont",
-                "defaultValue": "roboto",
-                "options": [
-                    {
-                        "label": "Roboto",
-                        "value": "roboto"
-                    },
-                    {
-                        "label": "Leco",
-                        "value": "leco"
-                    },
-                    {
-                        "label": "Bitham",
-                        "value": "bitham"
-                    },
-                ]
-            },
-            {
-                "type": "color",
-                "label": "Main time color",
-                "messageKey": "colorTime",
-                "defaultValue": "#FFFFFF",
-                "sunlight": false,
-                "capabilities": ["COLOR"]
-            },
-        ]
-    },
-    {
-        "type": "section",
-        "items": [
-            {
-                "type": "heading",
                 "defaultValue": "Second city time"
             },
             {
@@ -72,12 +25,13 @@ module.exports = [
                 "type": "toggle",
                 "label": "Show second city",
                 "messageKey": "secondCityEnabled",
-                "defaultValue": false
+                "defaultValue": true
             },
             {
                 "type": "input",
                 "label": "City label",
                 "messageKey": "secondCityLabel",
+                "defaultValue": "BKK",
                 "description": "A short label shown before the time, e.g. \"BKK\". Leave blank to show just the time.",
                 "attributes": {
                     "placeholder": "e.g. BKK",
@@ -88,7 +42,7 @@ module.exports = [
                 "type": "select",
                 "label": "Timezone (UTC offset)",
                 "messageKey": "secondCityOffset",
-                "defaultValue": "0",
+                "defaultValue": "420",
                 "options": [
                     { "label": "UTC-12:00", "value": "-720" },
                     { "label": "UTC-11:00", "value": "-660" },
@@ -130,44 +84,6 @@ module.exports = [
                     { "label": "UTC+14:00", "value": "840" }
                 ]
             }
-        ]
-    },
-    {
-        "type": "section",
-        "items": [
-            {
-                "type": "heading",
-                "defaultValue": "Calendar",
-            },
-            {
-                "type": "text",
-                "defaultValue": "The calendar shows the current week only (one row)."
-            },
-            {
-                "type": "color",
-                "label": "Today highlight",
-                "messageKey": "colorToday",
-                "defaultValue": "#000000",
-                "description": "Black (default) means match date color, any other value overrides this.",
-                "sunlight": false,
-                "capabilities": ["COLOR"]
-            },
-            {
-                "type": "color",
-                "label": "Sunday color",
-                "messageKey": "colorSunday",
-                "defaultValue": "#FF0000",
-                "sunlight": false,
-                "capabilities": ["COLOR"]
-            },
-            {
-                "type": "color",
-                "label": "Saturday color",
-                "messageKey": "colorSaturday",
-                "defaultValue": "#FF5500",
-                "sunlight": false,
-                "capabilities": ["COLOR"]
-            },
         ]
     },
     {

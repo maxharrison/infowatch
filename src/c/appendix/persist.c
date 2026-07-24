@@ -45,7 +45,7 @@ void persist_init() {
     }
     if (!persist_exists(CONFIG)) {
         Config config = (Config) {
-            .time_lead_zero = false,
+            .time_lead_zero = true,
             .prev_week = true,
             .time_font = TIME_FONT_ROBOTO,
             .color_today = GColorBlack,
@@ -58,9 +58,9 @@ void persist_init() {
             .color_sunday = GColorRed,
             .color_time = GColorWhite,
             .day_night_shading = true,
-            .second_city_enabled = false,
-            .second_city_offset = 0,
-            .second_city_label = ""
+            .second_city_enabled = true,
+            .second_city_offset = 420,
+            .second_city_label = "BKK"
         };
         persist_set_config(config);
     }

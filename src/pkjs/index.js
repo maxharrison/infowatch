@@ -274,7 +274,7 @@ function getDefaultClaySettings() {
         fetch: false,
         location: '',
         dayNightShading: true,
-        timeLeadingZero: false,
+        timeLeadingZero: true,
         timeShowAmPm: false,
         timeFont: 'roboto',
         colorTime: DEFAULT_COLOR_WHITE,
@@ -285,9 +285,9 @@ function getDefaultClaySettings() {
         showQt: true,
         vibe: false,
         btIcons: 'both',
-        secondCityEnabled: false,
-        secondCityLabel: '',
-        secondCityOffset: '0'
+        secondCityEnabled: true,
+        secondCityLabel: 'BKK',
+        secondCityOffset: '420'
     };
 }
 

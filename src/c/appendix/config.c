@@ -12,7 +12,7 @@ Config *g_config;
 // function instead. See: https://gcc.gnu.org/onlinedocs/gcc/Compound-Literals.html
 static Config config_defaults(void) {
     return (Config) {
-        .time_lead_zero = false,
+        .time_lead_zero = true,
         .prev_week = true,
         .show_qt = true,
         .show_bt = true,
@@ -25,9 +25,9 @@ static Config config_defaults(void) {
         .color_sunday = GColorRed,
         .color_time = GColorWhite,
         .day_night_shading = true,
-        .second_city_enabled = false,
-        .second_city_offset = 0,
-        .second_city_label = ""
+        .second_city_enabled = true,
+        .second_city_offset = 420,
+        .second_city_label = "BKK"
     };
 }
 
